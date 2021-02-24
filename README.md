@@ -99,25 +99,10 @@ generator = Generator(
 generator.send_to_database(server)
 ```
 
-
-
-
-    1
-
-
-
-
 ```python
 # Delete the data (if needed)
 generator.delete_from_database(server)
 ```
-
-
-
-
-    1
-
-
 
 ### 4. Report 3 relevant KPIs
 
