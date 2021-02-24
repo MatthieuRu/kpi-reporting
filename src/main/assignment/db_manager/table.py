@@ -1,7 +1,3 @@
-import datetime
-import pandas as pd
-
-
 class Table:
     """A Postgres table.
     """
@@ -68,7 +64,8 @@ class Table:
             return 1
         else:
             print("you dataframe has different columns than the sql table")
-            print("Extra columns of your df:", set(list(df)) - set(self.structure))
+            print("Extra columns of your df:", set(
+                list(df)) - set(self.structure))
             return 0
 
     def get_structure(self):
@@ -79,4 +76,3 @@ class Table:
         )
 
         return self.server._execute_extract(statement)
-

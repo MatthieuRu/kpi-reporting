@@ -1,6 +1,6 @@
-import os
 from sqlalchemy import create_engine
 from .table import Table
+
 
 class DataBase:
     """A Postgres database.

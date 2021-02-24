@@ -2,33 +2,33 @@
 
 This **notebook** is considered as the same time as the main & README to learn how to use the package.
 
-They is 4 differents steps in the project:
+They is 4 different steps in the project:
 1. Introduction
 2. Create the Fake Database & Tables.
 3. Generate the fake Dataset.
 4. Report 3 relevant KPIs.
 
 
-- ```git clone the project``` *Git clone the project from Github.*
+- ```git clone git@github.com:MatthieuRu/take-home-assignement.git``` *Git clone the project from Github.*
 - ```./start.sh``` *Launch the docker images including the postgre server*
 - ```conda env create``` *Create the conda environment based on the environment.yml.*
 - ```conda activate assigenment``` *Activate the conda environment.*
-- ```pytest src -v -s``` *Run the  unit tests.*
-- ```jupyter notebook README.ypnb``` *You can copy paster the Readme and start to play with the package*
+- ```pytest src -v -s``` *Run the unit tests.*
+- ```jupyter notebook README.ypnb``` *You can copy paste the README.ipynb and start to play with the package*
 
 ### 1. Introduction
 
-Before to start the project, all the stakeholder of these project has discussed about the expect output of the package:
+Before to start the project, the stakeholders of these project has discussed about the expected output of the package:
 - The Data Analyst & Engineer is playing the role of *Product Owner* and *Development Team*.
-- The Leadership team is the playing the *client*'s role. 
+- The Leadership team is playing the *client*'s role. 
 
-After the discussion, the ouptut of the KPI should cover the different topics:
+After the discussion, the ouptut of the KPI should cover some topics:
 1. The Company's Revenue
 2. The Client's Retention
 3. The Product's Usage
 
 
-In this context. a list of  3 KPI / 3 user stories has been approved by both team in term of getting all the information needed by the Leadership team:
+In this context, a list of  3 KPI / 3 user stories has been approved by both team in term of getting all the information needed by the Leadership team:
 
 
 **List of User story:**
@@ -40,7 +40,7 @@ In this context. a list of  3 KPI / 3 user stories has been approved by both tea
 
 ### 2. DB Management
 
-The main goal of this database is to not overload the database with useless information. If we need to add a values, it's because we cannot achieved a user story with the actual database structure.
+The main goal of this database is to not overload the database with useless information. If we need to add a column or a table, it's because we cannot achieve a user story with the actual database structure.
 
 
 
@@ -63,6 +63,8 @@ server = Server(
 # Create the schema and the needed tables.
 server._create_schema_abc('./src/main/assignment/db_manager/ABC.sql')
 ```
+
+
 ```python
 # Delete the schema (if needed)
 server._delete_schema_abc()
@@ -76,7 +78,6 @@ server._delete_schema_abc()
 **Step B. Implement all the followins month iteration:**
 1. Filter the company still active on the product by using session_information month X-1
 2. Create the session_information table for the month X
-
 
 
 
@@ -99,6 +100,7 @@ generator = Generator(
 generator.send_to_database(server)
 ```
 
+
 ```python
 # Delete the data (if needed)
 generator.delete_from_database(server)
@@ -112,7 +114,7 @@ The idea is to be able to track overtime all the relevant topics and group by th
 
 In this case, all the stakeholder has all the information needed to get:
 1. An overview of the health of the company
-2. Inititiate a deeper analysis (eg compare two periods or concatenate the two type of company)
+2. Inititiate a deeper analysis (eg compare two periods - concatenate the two type of company - get number of lost company)
 
 
 
@@ -682,9 +684,6 @@ from src.main.assignment.db_manager.get_kpi import get_kpi_revenue
 
 get_kpi_revenue(server)
 ```
-
-
-
 
 <div>
 <style scoped>

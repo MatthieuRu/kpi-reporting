@@ -1,4 +1,3 @@
-import subprocess
 import pandas as pd
 import sqlalchemy
 from .database import DataBase
@@ -47,8 +46,7 @@ class Server:
         return 1
 
     def _delete_schema_abc(self):
-        query="""drop schema abc cascade;"""
+        query = """drop schema abc cascade;"""
         self._execute_action(query)
         self.db = self._get_databases()
         return 1
-    

@@ -6,8 +6,8 @@ def get_kpi_usage(server: Server) -> pd.DataFrame:
     query = """
         select
             period,
-            company_size,
-            (nb_session / nb_company) as nb_average_session
+            (nb_session / nb_company) as nb_average_session,
+            company_size
         from (
             select
                 date_trunc('month', si.created_at)::date as period,
