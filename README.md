@@ -1,5 +1,5 @@
 
-### Take Home Assignement
+### Take Home Assignment
 
 This **notebook** is considered as the same time as the main & README to learn how to use the package.
 
@@ -10,12 +10,12 @@ They is 4 different steps in the project:
 4. Report 3 relevant KPIs.
 
 
-- ```git clone git@github.com:MatthieuRu/take-home-assignement.git``` *Git clone the project from Github.*
+- ```git clone git@github.com:MatthieuRu/take-home-assignment.git``` *Git clone the project from Github.*
 - ```./start.sh``` *Launch the docker images including the postgre server*
 - ```conda env create``` *Create the conda environment based on the environment.yml.*
-- ```conda activate assigenment``` *Activate the conda environment.*
+- ```conda activate assignment``` *Activate the conda environment.*
 - ```pytest src -v -s``` *Run the unit tests.*
-- ```jupyter notebook README.ypnb``` *You can copy paste the README.ipynb and start to play with the package*
+- ```jupyter notebook README.ipynb``` *You can copy paste the README.ipynb and start to play with the package*
 
 ### 1. Introduction
 
@@ -37,16 +37,11 @@ In this context, a list of  3 KPI / 3 user stories has been approved by both tea
 1. As a a menber of the Leadership team, I want to how much is the revenu group by company size at he month X.
 1. As a a menber of the Leadership team, I want to how many time our customers has used in average our product group by company size at he month X.
 
-
-
 ### 2. DB Management
 
 The main goal of this database is to not overload the database with useless information. If we need to add a column or a table, it's because we cannot achieve a user story with the actual database structure.
 
-
-
 <img src='schemas.png' width="500" height="200">
-
 
 ```python
 from src.main.assignment.db_manager.server import Server
@@ -59,12 +54,10 @@ server = Server(
 ) 
 ```
 
-
 ```python
 # Create the schema and the needed tables.
 server._create_schema_abc('./src/main/assignment/db_manager/ABC.sql')
 ```
-
 
 ```python
 # Delete the schema (if needed)
@@ -90,8 +83,6 @@ server._delete_schema_abc()
 1. Filter the company still active on the product by using session_information month X-1
 2. Create the session_information table for the month X
 
-
-
 ```python
 from src.main.assignment.db_manager.generator import Generator
 import datetime
@@ -105,12 +96,10 @@ generator = Generator(
 )
 ```
 
-
 ```python
 # send the fake data into the database.
 generator.send_to_database(server)
 ```
-
 
 ```python
 # Delete the data (if needed)
@@ -127,17 +116,11 @@ In this case, all the stakeholder has all the information needed to get:
 1. An overview of the health of the company
 2. Inititiate a deeper analysis (eg compare two periods - concatenate the two type of company - get number of lost company)
 
-
-
-
 ```python
 from src.main.assignment.db_manager.get_kpi import get_kpi_usage
 
 get_kpi_usage(server)
 ```
-
-
-
 
 <div>
 <table border="1" class="dataframe">
@@ -928,5 +911,3 @@ get_kpi_revenue(server)
   </tbody>
 </table>
 </div>
-
-
