@@ -1,66 +1,972 @@
-# Data Engineering & Analyst Assignment
+### Take Home Assignement
 
-## Background:
+This **notebook** is considered as the same time as the main & README to learn how to use the package.
 
-The role of data analyst & engineer is to support by helping stakeholders get the data they need in order to make better decisions. As such, "practical" and "done" is more important than "perfect", but the validity of decisons depends on obtaining good quality, timely correct data.
+They is 4 differents steps in the project:
+1. Introduction
+2. Create the Fake Database & Tables.
+3. Generate the fake Dataset.
+4. Report 3 relevant KPIs.
 
-This assignment is intended to see how you would approach an every-day data problems. We expect that it should take approximately three hours to complete.
 
-Your work will be assessed on a number of criteria:
+- ```git clone the project``` *Git clone the project from Github.*
+- ```./start.sh``` *Launch the docker images including the postgre server*
+- ```conda env create``` *Create the conda environment based on the environment.yml.*
+- ```conda activate assigenment``` *Activate the conda environment.*
+- ```pytest src -v -s``` *Run the  unit tests.*
+- ```jupyter notebook README.ypnb``` *You can copy paster the Readme and start to play with the package*
 
-* Does it work as required? We will follow any instructions you have provided and attempt to re-run your project.
-* How do we know the code will execute as intended in production?
-* How easy is it for other developers to contribute to the project?
+### 1. Introduction
 
-Please create a public github repo and share the link. Include any file or component which is needed to re-run the assignment such as scripts and instructions. Please do not include any database internal files. Feel free to restructure the repo to suit your needs.
+Before to start the project, all the stakeholder of these project has discussed about the expect output of the package:
+- The Data Analyst & Engineer is playing the role of *Product Owner* and *Development Team*.
+- The Leadership team is the playing the *client*'s role. 
 
-## Assignment:
+After the discussion, the ouptut of the KPI should cover the different topics:
+1. The Company's Revenue
+2. The Client's Retention
+3. The Product's Usage
 
-You are introduced to a software-as-a-service company (SaaS) called ABC Enterprises. The leadership is flying blind and urgently needs an analysis of the help of the company. They currently lack any KPIs. Put on your superhero suit and open your favorite IDE.
 
-You task will be to:
- - Generate a fake dataset representing the company's database and store it in a local PostgreSQL database.
- - Report 3 relevant KPIs of business health.
- - Explain how you would go about understanding the problem and arrive at a solution.
+In this context. a list of  3 KPI / 3 user stories has been approved by both team in term of getting all the information needed by the Leadership team:
 
-### Spin up the PostgreSQL database
 
-Make sure Docker is installed and run:
+**List of User story:**
+1. As a a menber of the Leadership team, I want to know how many client group by company size at the month X.
+1. As a a menber of the Leadership team, I want to how much is the revenu group by company size at he month X.
+1. As a a menber of the Leadership team, I want to how many time our customers has used in average our product group by company size at he month X.
 
-``` bash
-./start.sh
+
+
+### 2. DB Management
+
+The main goal of this database is to not overload the database with useless information. If we need to add a values, it's because we cannot achieved a user story with the actual database structure.
+
+
+
+<img src='schemas.png' width="500" height="200">
+
+
+```python
+from src.main.assignment.db_manager.server import Server
+# Connection to the server
+server = Server(
+    ip='0.0.0.0',
+    user='application',
+    passwd='secretpassword',
+    database='application'
+) 
 ```
 
-The credentials for the database can be found in the `docker-compose.yml` file.
 
-### Generating the data
+```python
+# Create the schema and the needed tables.
+server._create_schema_abc('./src/main/assignment/db_manager/ABC.sql')
+```
+```python
+# Delete the schema (if needed)
+server._delete_schema_abc()
+```
 
-Rules:
- - Let's assume the company has existed for 12 months, they acquired all their customers on month 1 and they will not gain any more customers in the following 12 months.
- - All customers (referred to as companies) have monthly subscriptions.
- - Create 500 companies, each with a unique `company_id` .
- - Each company is a company_size="small" with a probability of 0. 7 and "large" with a probability of 0. 3.
- - Monthly subscriptions for small and large companies are $19 and $99 respectively.
- - Each small company has the number of sessions in a month equal to 5, plus or minus a uniform random integer between 0 & 5.
- - Each large company has the number of sessions in a month equal to 10, plus or minus a uniform random integer between 0 & 10.
- - Give each session a random `created_at` timestamp within that month.
- - If a company has 0 sessions in a month, they have churned that month and will not come back (i. e. have no future sessions).
+### 3. Generate Fake Table
 
-Create a python package in `main/assignment` to generate this data and store it into the PostgeSQL database. This package should also create an appropriate database schema. Use the `build.sh` script to install it in a virtual environment in the projects root directory.
+**Step A. Initate the fake data generation:**
+1. Create the company table for the month 0
 
-### Reporting KPIs
+**Step B. Implement all the followins month iteration:**
+1. Filter the company still active on the product by using session_information month X-1
+2. Create the session_information table for the month X
 
-Finally, we want to inform ABC Enterprises of the overall health of their business.
 
-Enable your python package to query for 3 relevant KPIs using SQL and simply print them. You should be able to motivate your choice of KPIs.
 
-## Task Summary
 
- - Use the docker-compose file in this project to spin up a new postgres database.
- - Use any necessary Python libraries.
- - Create an appropriate database schema - please provide a way for us to recreate this schema.
- - Write a Python script that generates fake data and stores it as tables in the local database.
- - Write a Python script that will use SQL to query and print 3 relevant KPIs.
- - Add any necessary tests.
- - Provided some instructions which will allow us to repeat everything you have done. Put this in another markdown file.
- - Create a public github repo and share the link.
+```python
+from src.main.assignment.db_manager.generator import Generator
+import datetime
+
+starting_date = datetime.date(2021, 1, 1)
+nb_company = 500
+generator = Generator(
+    starting_date,
+    nb_company,
+    nb_month=20
+)
+```
+
+
+```python
+# send the fake data into the database.
+generator.send_to_database(server)
+```
+
+
+
+
+    1
+
+
+
+
+```python
+# Delete the data (if needed)
+generator.delete_from_database(server)
+```
+
+
+
+
+    1
+
+
+
+### 4. Report 3 relevant KPIs
+
+The KPI is following the **scope / design** aligned at the introduction of the project.
+
+The idea is to be able to track overtime all the relevant topics and group by the company size.
+
+In this case, all the stakeholder has all the information needed to get:
+1. An overview of the health of the company
+2. Inititiate a deeper analysis (eg compare two periods or concatenate the two type of company)
+
+
+
+
+```python
+from src.main.assignment.db_manager.get_kpi import get_kpi_usage
+
+get_kpi_usage(server)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>period</th>
+      <th>company_size</th>
+      <th>nb_average_session</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2021-01-01</td>
+      <td>large</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2021-01-01</td>
+      <td>small</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2021-02-01</td>
+      <td>large</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2021-02-01</td>
+      <td>small</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2021-03-01</td>
+      <td>large</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2021-03-01</td>
+      <td>small</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2021-04-01</td>
+      <td>large</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2021-04-01</td>
+      <td>small</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2021-05-01</td>
+      <td>large</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>2021-05-01</td>
+      <td>small</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>2021-06-01</td>
+      <td>large</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>2021-06-01</td>
+      <td>small</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>2021-07-01</td>
+      <td>large</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>2021-07-01</td>
+      <td>small</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>2021-08-01</td>
+      <td>large</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>2021-08-01</td>
+      <td>small</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>2021-09-01</td>
+      <td>large</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>2021-09-01</td>
+      <td>small</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>2021-10-01</td>
+      <td>large</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>2021-10-01</td>
+      <td>small</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>2021-11-01</td>
+      <td>large</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>2021-11-01</td>
+      <td>small</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>2021-12-01</td>
+      <td>large</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>2021-12-01</td>
+      <td>small</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>2022-01-01</td>
+      <td>large</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>2022-01-01</td>
+      <td>small</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>2022-02-01</td>
+      <td>large</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>2022-02-01</td>
+      <td>small</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>2022-03-01</td>
+      <td>large</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>2022-03-01</td>
+      <td>small</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>2022-04-01</td>
+      <td>large</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>2022-04-01</td>
+      <td>small</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>2022-05-01</td>
+      <td>large</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>2022-05-01</td>
+      <td>small</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>2022-06-01</td>
+      <td>large</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>2022-06-01</td>
+      <td>small</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>2022-07-01</td>
+      <td>large</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td>2022-07-01</td>
+      <td>small</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>2022-08-01</td>
+      <td>large</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td>2022-08-01</td>
+      <td>small</td>
+      <td>5</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+from src.main.assignment.db_manager.get_kpi import get_kpi_retention
+
+get_kpi_retention(server)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>period</th>
+      <th>nb_company</th>
+      <th>company_size</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2021-01-01</td>
+      <td>141</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2021-01-01</td>
+      <td>309</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2021-02-01</td>
+      <td>131</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2021-02-01</td>
+      <td>270</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2021-03-01</td>
+      <td>125</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2021-03-01</td>
+      <td>241</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2021-04-01</td>
+      <td>124</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2021-04-01</td>
+      <td>216</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2021-05-01</td>
+      <td>116</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>2021-05-01</td>
+      <td>189</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>2021-06-01</td>
+      <td>110</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>2021-06-01</td>
+      <td>166</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>2021-07-01</td>
+      <td>103</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>2021-07-01</td>
+      <td>150</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>2021-08-01</td>
+      <td>97</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>2021-08-01</td>
+      <td>134</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>2021-09-01</td>
+      <td>95</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>2021-09-01</td>
+      <td>114</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>2021-10-01</td>
+      <td>89</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>2021-10-01</td>
+      <td>102</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>2021-11-01</td>
+      <td>85</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>2021-11-01</td>
+      <td>88</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>2021-12-01</td>
+      <td>78</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>2021-12-01</td>
+      <td>81</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>2022-01-01</td>
+      <td>72</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>2022-01-01</td>
+      <td>74</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>2022-02-01</td>
+      <td>70</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>2022-02-01</td>
+      <td>61</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>2022-03-01</td>
+      <td>64</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>2022-03-01</td>
+      <td>58</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>2022-04-01</td>
+      <td>58</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>2022-04-01</td>
+      <td>49</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>2022-05-01</td>
+      <td>56</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>2022-05-01</td>
+      <td>43</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>2022-06-01</td>
+      <td>56</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>2022-06-01</td>
+      <td>39</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>2022-07-01</td>
+      <td>54</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td>2022-07-01</td>
+      <td>35</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>2022-08-01</td>
+      <td>47</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td>2022-08-01</td>
+      <td>31</td>
+      <td>small</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+from src.main.assignment.db_manager.get_kpi import get_kpi_revenue
+
+get_kpi_revenue(server)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>period</th>
+      <th>revenu</th>
+      <th>company_size</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2021-01-01</td>
+      <td>13959</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2021-02-01</td>
+      <td>12969</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2021-03-01</td>
+      <td>12375</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2021-04-01</td>
+      <td>12276</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2021-05-01</td>
+      <td>11484</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2021-06-01</td>
+      <td>10890</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2021-07-01</td>
+      <td>10197</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2021-08-01</td>
+      <td>9603</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2021-09-01</td>
+      <td>9405</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>2021-10-01</td>
+      <td>8811</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>2021-11-01</td>
+      <td>8415</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>2021-12-01</td>
+      <td>7722</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>2022-01-01</td>
+      <td>7128</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>2022-02-01</td>
+      <td>6930</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>2022-03-01</td>
+      <td>6336</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>2022-04-01</td>
+      <td>5742</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>2022-05-01</td>
+      <td>5544</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>2022-06-01</td>
+      <td>5544</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>2022-07-01</td>
+      <td>5346</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>2022-08-01</td>
+      <td>4653</td>
+      <td>large</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>2021-01-01</td>
+      <td>5871</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>2021-02-01</td>
+      <td>5130</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>2021-03-01</td>
+      <td>4579</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>2021-04-01</td>
+      <td>4104</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>2021-05-01</td>
+      <td>3591</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>2021-06-01</td>
+      <td>3154</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>2021-07-01</td>
+      <td>2850</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>2021-08-01</td>
+      <td>2546</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>2021-09-01</td>
+      <td>2166</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>2021-10-01</td>
+      <td>1938</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>2021-11-01</td>
+      <td>1672</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>2021-12-01</td>
+      <td>1539</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>2022-01-01</td>
+      <td>1406</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>2022-02-01</td>
+      <td>1159</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>2022-03-01</td>
+      <td>1102</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>2022-04-01</td>
+      <td>931</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>2022-05-01</td>
+      <td>817</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td>2022-06-01</td>
+      <td>741</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>2022-07-01</td>
+      <td>665</td>
+      <td>small</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td>2022-08-01</td>
+      <td>589</td>
+      <td>small</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
