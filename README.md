@@ -1,3 +1,4 @@
+
 ### Take Home Assignement
 
 This **notebook** is considered as the same time as the main & README to learn how to use the package.
@@ -71,6 +72,16 @@ server._delete_schema_abc()
 ```
 
 ### 3. Generate Fake Table
+
+**Rules**
+ - Let's assume the company has existed for 12 months, they acquired all their customers on month 1 and they will not gain any more customers in the following 12 months.
+ - All customers (referred to as companies) have monthly subscriptions.
+ - Create 500 companies, each with a unique `company_id` .
+ - Each company is a company_size="small" with a probability of 0. 7 and "large" with a probability of 0. 3.
+ - Each small company has the number of sessions in a month equal to 5, plus or minus a uniform random integer between 0 & 5.
+ - Each large company has the number of sessions in a month equal to 10, plus or minus a uniform random integer between 0 & 10.
+ - Give each session a random `created_at` timestamp within that month.
+ - If a company has 0 sessions in a month, they have churned that month and will not come back (i. e. have no future sessions).
 
 **Step A. Initate the fake data generation:**
 1. Create the company table for the month 0
@@ -684,6 +695,9 @@ from src.main.assignment.db_manager.get_kpi import get_kpi_revenue
 
 get_kpi_revenue(server)
 ```
+
+
+
 
 <div>
 <style scoped>
